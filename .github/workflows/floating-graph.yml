@@ -1,0 +1,35 @@
+name: generate floating contribution graph
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # once a day
+  workflow_dispatch: # lets you trigger it manually from the Actions tab
+  push:
+    branches:
+      - main
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate SVGs
+        run: node generate-floating-graph.js
+        env:
+          GH_USERNAME: pavanshenoy21
+          GH_TOKEN: ${{ secrets.GRAPH_TOKEN }}
+
+      - name: Push to output branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: output
+          publish_dir: ./dist
+          force_orphan: true
